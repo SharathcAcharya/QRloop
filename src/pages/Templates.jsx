@@ -1,5 +1,5 @@
 import React from 'react';
-import { Template, Palette, Star, Download } from 'lucide-react';
+import { Layout, Palette, Star, Download } from 'lucide-react';
 
 const Templates = () => {
   return (
@@ -16,7 +16,7 @@ const Templates = () => {
 
         <div className="card">
           <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-12 text-center">
-            <Template size={64} className="mx-auto text-gray-400 mb-4" />
+            <Layout size={64} className="mx-auto text-gray-400 mb-4" />
             <p className="text-gray-600 dark:text-gray-300">
               Professional QR code templates will be implemented here
             </p>

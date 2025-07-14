@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import useAnalytics from '../hooks/useAnalytics';
 import { 
   Type, 
   Link2, 
@@ -31,6 +32,7 @@ const QRGenerator = () => {
     visualization3D 
   } = useQRStore();
   const { showSuccess, showError, incrementQRGenerated, trackFeatureUsage } = useNotificationStore();
+  const { trackQRGeneration, testConnection } = useAnalytics();
   
   const [activeTab, setActiveTab] = useState('text');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -67,6 +69,14 @@ const QRGenerator = () => {
         data: qrData,
         options: qrOptions,
         name: `QR Code ${Date.now()}`,
+      });
+      
+      // Track analytics
+      await trackQRGeneration({
+        text: qrData,
+        type: activeTab,
+        size: qrOptions.size,
+        errorCorrectionLevel: qrOptions.errorCorrection
       });
       
       incrementQRGenerated();
@@ -417,6 +427,21 @@ const QRGenerator = () => {
                     <span>Save</span>
                   </button>
                 </div>
+
+                {/* Firebase Connection Test - Remove in production */}
+                <button
+                  onClick={async () => {
+                    const result = await testConnection();
+                    if (result.success) {
+                      showSuccess('Firebase connection successful!');
+                    } else {
+                      showError(`Firebase connection failed: ${result.error}`);
+                    }
+                  }}
+                  className="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm"
+                >
+                  Test Firebase Connection
+                </button>
               </div>
             </div>
           </div>
