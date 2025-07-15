@@ -9,14 +9,7 @@ The Firebase connection issues in production are caused by missing environment v
 Go to your Netlify site dashboard and add these environment variables in **Site Settings > Environment Variables**:
 
 ```
-VITE_FIREBASE_API_KEY=AIzaSyD_u9B6RFKlIvujMp--kt_jiIBeZIeNVyg
-VITE_FIREBASE_AUTH_DOMAIN=qrloop-project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=qrloop-project
-VITE_FIREBASE_STORAGE_BUCKET=qrloop-project.firebasestorage.app
-VITE_FIREBASE_MESSAGING_SENDER_ID=507070415403
-VITE_FIREBASE_APP_ID=1:507070415403:web:276a394bd823a118cf206e
-VITE_FIREBASE_MEASUREMENT_ID=G-8TDP69XX8Y
-VITE_FIREBASE_DATABASE_URL=https://qrloop-project-default-rtdb.asia-southeast1.firebasedatabase.app
+
 ```
 
 ### 2. Build Settings
@@ -58,6 +51,45 @@ The app now includes comprehensive offline support, so even if Firebase connecti
 - Data will be stored locally
 - Analytics will be tracked offline
 - All features remain functional
+
+### Missing JS Chunk / Dynamic Import Error (404)
+
+If you see errors like:
+- `Failed to fetch dynamically imported module: https://qrloop.netlify.app/assets/QRGenerator-xxxx.js`
+- `Uncaught TypeError: Failed to fetch dynamically imported module`
+- 404 errors for JS chunks in the browser console
+
+Follow these steps to resolve:
+
+1. **Clear Netlify Build Cache**
+   - Go to Netlify Site Settings > Build & Deploy > Post processing > Clear cache and deploy site.
+   - This forces Netlify to rebuild all chunks and fixes missing assets.
+
+2. **Redeploy**
+   - Trigger a fresh deploy after clearing the cache.
+   - Or push a new commit to your repo to trigger a build.
+
+3. **Check Dynamic Imports**
+   - If you use `React.lazy` or dynamic `import()` for components, make sure the file exists and is correctly referenced in your routes.
+   - Ensure the file name and path match your import statement.
+
+4. **Verify Build Output Locally**
+   - Run `npm run build` locally.
+   - Check the `dist/assets` folder for the missing chunk. If it’s missing, there may be a build config issue.
+
+5. **Check Environment Variables**
+   - Make sure all required Firebase environment variables are set in Netlify. Missing variables can cause build failures and missing chunks.
+
+6. **Check for Vite/React Build Issues**
+   - If you use Vite, ensure your `vite.config.js` is correct and does not exclude important files from the build.
+   - Make sure your routes and lazy imports do not reference files that are excluded from the build.
+
+7. **Review Netlify Deploy Logs**
+   - Look for any errors or warnings about chunk generation or missing files.
+
+---
+
+If you follow these steps, the missing chunk and dynamic import errors should be resolved. Your app will load all pages and components correctly after a successful redeploy.
 
 ### Security Note
 
