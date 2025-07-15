@@ -13,6 +13,7 @@ import {
   Zap
 } from 'lucide-react';
 import { useAdmin } from '../../contexts/AdminContext';
+import ConnectionStatus from '../common/ConnectionStatus';
 
 const Navbar = ({ onMenuClick, isDarkMode, toggleDarkMode }) => {
   const location = useLocation();
@@ -176,6 +177,9 @@ const Navbar = ({ onMenuClick, isDarkMode, toggleDarkMode }) => {
             >
               {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
+
+            {/* Connection Status */}
+            <ConnectionStatus className="hidden sm:block" />
 
             {/* Settings */}
             <Link

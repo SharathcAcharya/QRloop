@@ -10,6 +10,7 @@ import Footer from './components/layout/Footer';
 import OnboardingTour from './components/onboarding/OnboardingTour';
 import LoadingScreen from './components/common/LoadingScreen';
 import FirebaseStatus from './components/common/FirebaseStatus';
+import ConnectionStatus from './components/common/ConnectionStatus';
 import AdminProtectedRoute from './components/common/AdminProtectedRoute';
 
 // Immediately loaded pages (most critical)

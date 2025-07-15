@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
+import FirebaseErrorBoundary from './components/common/FirebaseErrorBoundary';
 import './index.css';
 
 // Register service worker (handled by vite-plugin-pwa)
@@ -30,13 +31,15 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
 const root = createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <BrowserRouter
-      future={{
-        v7_startTransition: true,
-        v7_relativeSplatPath: true
-      }}
-    >
-      <App />
-    </BrowserRouter>
+    <FirebaseErrorBoundary>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true
+        }}
+      >
+        <App />
+      </BrowserRouter>
+    </FirebaseErrorBoundary>
   </React.StrictMode>
 );
