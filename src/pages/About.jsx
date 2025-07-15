@@ -1,5 +1,4 @@
-import React from 'react';
-import { Info, Heart, Star, Github, Globe } from 'lucide-react';
+import { Info } from 'lucide-react';
 
 const About = () => {
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Menu, 
@@ -12,13 +12,13 @@ import {
   Download,
   Zap
 } from 'lucide-react';
-import { useThemeStore } from '../../stores/themeStore';
-import { useNotificationStore } from '../../stores/notificationStore';
+import { useAdmin } from '../../contexts/AdminContext';
 
-const Navbar = ({ onMenuClick }) => {
+const Navbar = ({ onMenuClick, isDarkMode, toggleDarkMode }) => {
   const location = useLocation();
-  const { isDarkMode, toggleDarkMode } = useThemeStore();
-  const { notifications, updateAvailable } = useNotificationStore();
+  const { isAdmin } = useAdmin();
+  const [notifications] = useState([]);
+  const [updateAvailable] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -28,7 +28,7 @@ const Navbar = ({ onMenuClick }) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       // Implement search functionality
-      console.log('Searching for:', searchQuery);
+      // Search logic would go here
     }
   };
 
@@ -85,16 +85,19 @@ const Navbar = ({ onMenuClick }) => {
             >
               Library
             </Link>
-            <Link
-              to="/analytics"
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                location.pathname === '/analytics'
-                  ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400'
-              }`}
-            >
-              Analytics
-            </Link>
+            {/* Only show Analytics to admin users */}
+            {isAdmin && (
+              <Link
+                to="/analytics"
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  location.pathname === '/analytics'
+                    ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400'
+                }`}
+              >
+                Analytics
+              </Link>
+            )}
             <Link
               to="/collaboration"
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${

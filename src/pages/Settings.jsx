@@ -1,5 +1,4 @@
-import React from 'react';
-import { Settings as SettingsIcon, User, Palette, Bell, Shield } from 'lucide-react';
+import { Settings as SettingsIcon } from 'lucide-react';
 
 const Settings = () => {
   return (

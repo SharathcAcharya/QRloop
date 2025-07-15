@@ -4,7 +4,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 // Simple Firebase connection test
 export const testFirebaseConnection = async () => {
   try {
-    console.log('Testing Firebase connection...');
+    // Testing Firebase connection silently
     
     const testData = {
       test: true,
@@ -14,7 +14,7 @@ export const testFirebaseConnection = async () => {
     
     // Use a collection that's explicitly allowed in our rules
     const docRef = await addDoc(collection(db, 'user_activity'), testData);
-    console.log('✅ Firebase connection successful! Document ID:', docRef.id);
+    // Connection successful
     
     return { success: true, id: docRef.id };
   } catch (error) {

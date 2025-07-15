@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAdmin } from '../contexts/AdminContext';
 import { Lock, Eye, EyeOff, LogIn } from 'lucide-react';

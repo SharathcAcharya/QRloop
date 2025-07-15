@@ -4,13 +4,11 @@ import {
   getDocs, 
   doc, 
   updateDoc, 
-  deleteDoc, 
   setDoc,
   query, 
   where, 
   orderBy, 
   limit,
-  startAfter,
   serverTimestamp,
   increment 
 } from 'firebase/firestore';
@@ -33,11 +31,11 @@ export class AnalyticsService {
         type: 'generation'
       };
       
-      console.log('Tracking QR generation with data:', cleanData);
+      // Track QR generation - debug info would go here in development
       
       const docRef = await addDoc(collection(db, 'qr_generations'), cleanData);
       
-      console.log('QR generation tracked successfully:', docRef.id);
+      // QR generation tracked successfully - notification would go here
       
       // Update daily stats
       await this.updateDailyStats('generations', 1);

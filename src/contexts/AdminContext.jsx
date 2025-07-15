@@ -8,16 +8,14 @@ import {
 import { 
   doc, 
   setDoc, 
-  getDoc, 
-  collection, 
-  query, 
-  where, 
-  getDocs 
+  getDoc
 } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 
 const AdminContext = createContext();
 
+// Custom hook for admin context
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAdmin = () => {
   const context = useContext(AdminContext);
   if (!context) {
@@ -26,7 +24,7 @@ export const useAdmin = () => {
   return context;
 };
 
-export const AdminProvider = ({ children }) => {
+const AdminProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -63,7 +61,7 @@ export const AdminProvider = ({ children }) => {
       
       // Add admin document to Firestore
       await setDoc(doc(db, 'admins', result.user.uid), {
-        email: email,
+        email,
         role: 'admin',
         createdAt: new Date(),
         ...adminData
@@ -100,4 +98,4 @@ export const AdminProvider = ({ children }) => {
   );
 };
 
-export default AdminContext;
+export default AdminProvider;

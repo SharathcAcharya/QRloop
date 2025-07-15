@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   QrCode, 
@@ -12,19 +12,19 @@ import {
   ArrowRight,
   Play,
   Star,
-  Check,
-  Sparkles,
-  Globe,
-  Shield,
-  Smartphone
+  Sparkles
 } from 'lucide-react';
-import { useQRStore } from '../stores/qrStore';
-import { useNotificationStore } from '../stores/notificationStore';
+import { useAdmin } from '../contexts/AdminContext';
 
 const Home = () => {
-  const { qrHistory, favorites } = useQRStore();
-  const { trackFeatureUsage, userStats } = useNotificationStore();
-  const [currentFeature, setCurrentFeature] = useState(0);
+  const { isAdmin } = useAdmin();
+  const [qrHistory] = useState([]);
+  const [favorites] = useState([]);
+  const [userStats] = useState({ qrCount: 0, scans: 0 });
+
+  const trackFeatureUsage = (_feature) => {
+    // Feature tracking would go here
+  };
 
   const features = [
     {
@@ -86,13 +86,14 @@ const Home = () => {
       path: '/templates',
       color: 'bg-accent-500',
     },
-    {
+    // Only show Analytics to admin users
+    ...(isAdmin ? [{
       title: 'View Analytics',
       description: 'Track performance and usage statistics',
       icon: BarChart3,
       path: '/analytics',
       color: 'bg-purple-500',
-    },
+    }] : []),
   ];
 
   const testimonials = [
@@ -122,13 +123,13 @@ const Home = () => {
     },
   ];
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentFeature((prev) => (prev + 1) % features.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [features.length]);
+  // Features auto-rotation disabled for now
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setCurrentFeature((prev) => (prev + 1) % features.length);
+  //   }, 5000);
+  //   return () => clearInterval(interval);
+  // }, [features.length]);
 
   return (
     <div className="min-h-screen">
@@ -251,7 +252,7 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => {
+            {features.map((feature) => {
               const Icon = feature.icon;
               return (
                 <div
@@ -338,7 +339,7 @@ const Home = () => {
                   ))}
                 </div>
                 <p className="text-gray-600 dark:text-gray-300 mb-4 italic">
-                  "{testimonial.quote}"
+                  &quot;{testimonial.quote}&quot;
                 </p>
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center">

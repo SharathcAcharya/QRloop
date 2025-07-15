@@ -140,7 +140,7 @@ export const useQRStore = create(
         visualization3D: { ...state.visualization3D, ...settings },
       })),
       
-      resetOptions: () => set((state) => ({
+      resetOptions: () => set((_state) => ({
         qrOptions: {
           width: 300,
           height: 300,
@@ -194,12 +194,12 @@ export const useQRStore = create(
       
       // Export functionality
       exportQR: async (format = 'png', quality = 1) => {
-        const { qrData, qrOptions } = get();
+        // get() would be used to access store state
         
         try {
           // This would be implemented with qr-code-styling library
           const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
+          // const ctx = canvas.getContext('2d'); // Would be used for canvas operations
           
           // Generate QR code and return blob
           return new Promise((resolve) => {

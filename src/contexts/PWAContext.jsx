@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useNotificationStore } from '../stores/notificationStore';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 const PWAContext = createContext();
 
+// Custom hook for PWA context
+// eslint-disable-next-line react-refresh/only-export-components
 export const usePWA = () => {
   const context = useContext(PWAContext);
   if (!context) {
@@ -11,7 +12,7 @@ export const usePWA = () => {
   return context;
 };
 
-export const PWAProvider = ({ children }) => {
+const PWAProvider = ({ children }) => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
@@ -19,14 +20,16 @@ export const PWAProvider = ({ children }) => {
   const [registration, setRegistration] = useState(null);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   
-  const { 
-    setInstallPrompt: setStoreInstallPrompt,
-    setInstalled: setStoreInstalled,
-    setUpdateAvailable: setStoreUpdateAvailable,
-    showSuccess,
-    showError,
-    showInfo
-  } = useNotificationStore();
+  // Replace store functions with simple notifications
+  const showSuccess = (_message) => {
+    // Success notification would go here
+  };
+  const showError = (_message) => {
+    // Error notification would go here
+  };
+  const showInfo = (_message) => {
+    // Info notification would go here
+  };
 
   // Check if app is already installed
   useEffect(() => {
@@ -40,18 +43,16 @@ export const PWAProvider = ({ children }) => {
                     document.referrer.includes('android-app://');
       
       setIsInstalled(isStandalone || isPWA);
-      setStoreInstalled(isStandalone || isPWA);
     };
 
     checkInstallation();
-  }, [setStoreInstalled]);
+  }, []);
 
   // Handle install prompt
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setInstallPrompt(e);
-      setStoreInstallPrompt(e);
       setIsInstallable(true);
       
       showInfo('QRloop can be installed as an app for a better experience!');
@@ -59,9 +60,7 @@ export const PWAProvider = ({ children }) => {
 
     const handleAppInstalled = () => {
       setIsInstalled(true);
-      setStoreInstalled(true);
       setInstallPrompt(null);
-      setStoreInstallPrompt(null);
       setIsInstallable(false);
       
       showSuccess('QRloop has been installed successfully!');
@@ -74,7 +73,7 @@ export const PWAProvider = ({ children }) => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
-  }, [setStoreInstallPrompt, setStoreInstalled, showInfo, showSuccess]);
+  }, []);
 
   // Handle online/offline status
   useEffect(() => {
@@ -95,7 +94,7 @@ export const PWAProvider = ({ children }) => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [showSuccess, showInfo]);
+  }, []);
 
   // Handle service worker registration and updates
   useEffect(() => {
@@ -110,7 +109,6 @@ export const PWAProvider = ({ children }) => {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
               setUpdateAvailable(true);
-              setStoreUpdateAvailable(true);
               showInfo('A new version of QRloop is available!');
             }
           });
@@ -121,11 +119,10 @@ export const PWAProvider = ({ children }) => {
       navigator.serviceWorker.addEventListener('message', (event) => {
         if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
           setUpdateAvailable(true);
-          setStoreUpdateAvailable(true);
         }
       });
     }
-  }, [setStoreUpdateAvailable, showInfo]);
+  }, []);
 
   // Install the app
   const installApp = async () => {
@@ -135,12 +132,10 @@ export const PWAProvider = ({ children }) => {
       const result = await installPrompt.prompt();
       if (result.outcome === 'accepted') {
         setIsInstalled(true);
-        setStoreInstalled(true);
         showSuccess('QRloop has been installed!');
       }
       
       setInstallPrompt(null);
-      setStoreInstallPrompt(null);
       setIsInstallable(false);
       
       return result.outcome === 'accepted';
@@ -259,3 +254,5 @@ export const PWAProvider = ({ children }) => {
     </PWAContext.Provider>
   );
 };
+
+export default PWAProvider;

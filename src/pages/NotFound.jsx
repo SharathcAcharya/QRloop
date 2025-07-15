@@ -1,6 +1,5 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { Home, Search, FileQuestion } from 'lucide-react';
+import { Home, FileQuestion } from 'lucide-react';
 
 const NotFound = () => {
   return (

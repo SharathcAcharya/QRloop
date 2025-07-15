@@ -194,3 +194,38 @@
     display: block !important;
   }
 }
+
+/* 3D Transform Utilities */
+@layer utilities {
+  .transform-gpu {
+    transform: translate3d(0, 0, 0);
+  }
+  
+  .rotate-y-12 {
+    transform: rotateY(12deg);
+  }
+  
+  .rotate-x-6 {
+    transform: rotateX(6deg);
+  }
+  
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  .hover\:rotate-y-12:hover {
+    transform: rotateY(12deg);
+  }
+  
+  .hover\:rotate-x-6:hover {
+    transform: rotateX(6deg);
+  }
+  
+  .hover\:scale-105:hover {
+    transform: scale(1.05);
+  }
+}

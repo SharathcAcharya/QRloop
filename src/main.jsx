@@ -4,17 +4,28 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
 
-// Register Service Worker for PWA
+// Service Worker management
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then((registration) => {
-        console.log('SW registered: ', registration);
-      })
-      .catch((registrationError) => {
-        console.log('SW registration failed: ', registrationError);
-      });
+  // Always unregister existing service workers in development
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      registration.unregister();
+      // Service worker unregistered
+    }
   });
+
+  // Only register in production
+  if (import.meta.env.PROD) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then((_registration) => {
+          // Service worker registered successfully
+        })
+        .catch((_registrationError) => {
+          // Service worker registration failed
+        });
+    });
+  }
 }
 
 const root = createRoot(document.getElementById('root'));

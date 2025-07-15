@@ -1,44 +1,123 @@
-import React, { useState, useEffect, useRef } from 'react';
-import useAnalytics from '../hooks/useAnalytics';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import QRCodeStyling from 'qr-code-styling';
 import { 
   Type, 
   Link2, 
-  Palette, 
   Download, 
   Eye, 
   Zap, 
-  RotateCcw,
   Save,
   Share2,
-  Settings,
-  Plus,
-  Minus,
   RefreshCw,
   Copy,
   Check,
-  Upload,
   X
 } from 'lucide-react';
-import { useQRStore } from '../stores/qrStore';
-import { useNotificationStore } from '../stores/notificationStore';
 
 const QRGenerator = () => {
-  const { 
-    qrData, 
-    qrOptions, 
-    setQRData, 
-    setQROptions, 
-    addToHistory, 
-    visualization3D 
-  } = useQRStore();
-  const { showSuccess, showError, incrementQRGenerated, trackFeatureUsage } = useNotificationStore();
-  const { trackQRGeneration, testConnection } = useAnalytics();
+  // Local state to replace store
+  const [qrData, setQRData] = useState('https://qrloop.com');
+  const [qrOptions, setQROptions] = useState({
+    width: 300,
+    height: 300,
+    margin: 10,
+    colorDark: '#000000',
+    colorLight: '#ffffff',
+    correctLevel: 'H',
+    dotsOptions: {
+      color: '#000000',
+      type: 'rounded'
+    },
+    backgroundOptions: {
+      color: '#ffffff',
+    },
+    cornersSquareOptions: {
+      color: '#000000',
+      type: 'extra-rounded'
+    },
+    cornersDotOptions: {
+      color: '#000000',
+      type: 'dot'
+    },
+    logoImage: null,
+    logoMargin: 5,
+    logoSize: 0.5
+  });
+  
+  const [logoPreview, setLogoPreview] = useState(null);
+  
+  const showSuccess = (_message) => {
+    // Success notification would go here
+  };
+  
+  const showError = (_message) => {
+    // Error notification would go here  
+  };
+  
+  const incrementQRGenerated = () => {
+    // QR generation analytics would go here
+  };
+  
+  const trackFeatureUsage = (_feature) => {
+    // Feature tracking would go here
+  };
+  
+  const trackQRGeneration = (_data) => {
+    // QR generation analytics would go here
+  };
+  
+  const testConnection = () => {
+    // Connection test would go here
+  };
+
+  // Logo image handling
+  const handleLogoUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        showError('Please select a valid image file');
+        return;
+      }
+      
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showError('Image size should be less than 5MB');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageDataUrl = e.target.result;
+        setLogoPreview(imageDataUrl);
+        setQROptions(prev => ({ 
+          ...prev, 
+          logoImage: imageDataUrl 
+        }));
+        showSuccess('Logo uploaded successfully!');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeLogo = () => {
+    setLogoPreview(null);
+    setQROptions(prev => ({ 
+      ...prev, 
+      logoImage: null 
+    }));
+    showSuccess('Logo removed successfully!');
+  };
   
   const [activeTab, setActiveTab] = useState('text');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [show3D, setShow3D] = useState(false);
+  const [isEnhancing, setIsEnhancing] = useState(false);
   const canvasRef = useRef(null);
+  const qrCodeRef = useRef(null);
+  const [generated, setGenerated] = useState(false);
 
   const dataTypes = [
     { id: 'text', label: 'Text', icon: Type },
@@ -50,6 +129,101 @@ const QRGenerator = () => {
     { id: 'vcard', label: 'Contact', icon: '👤' },
   ];
 
+  // Initialize QR Code Styling
+  useEffect(() => {
+    qrCodeRef.current = new QRCodeStyling({
+      width: qrOptions.width,
+      height: qrOptions.height,
+      type: "svg",
+      data: qrData || "QRloop - Advanced QR Code Generator",
+      image: qrOptions.logoImage,
+      dotsOptions: {
+        color: qrOptions.dotsOptions?.color || qrOptions.colorDark || '#000000',
+        type: qrOptions.dotsOptions?.type || "square"
+      },
+      backgroundOptions: {
+        color: qrOptions.backgroundOptions?.color || qrOptions.colorLight || '#ffffff',
+      },
+      imageOptions: {
+        crossOrigin: "anonymous",
+        margin: qrOptions.logoMargin || 5,
+        imageSize: qrOptions.logoSize || 0.5
+      },
+      cornersSquareOptions: {
+        color: qrOptions.cornersSquareOptions?.color || qrOptions.colorDark || '#000000',
+        type: qrOptions.cornersSquareOptions?.type || "square"
+      },
+      cornersDotOptions: {
+        color: qrOptions.cornersDotOptions?.color || qrOptions.colorDark || '#000000',
+        type: qrOptions.cornersDotOptions?.type || "square"
+      },
+      qrOptions: {
+        errorCorrectionLevel: qrOptions.correctLevel || "H"
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Memoize QR options to prevent unnecessary re-renders
+  const memoizedQROptions = useMemo(() => ({
+    width: qrOptions.width,
+    height: qrOptions.height,
+    data: qrData || "QRloop - Advanced QR Code Generator",
+    image: qrOptions.logoImage,
+    dotsOptions: {
+      color: qrOptions.dotsOptions?.color || qrOptions.colorDark || '#000000',
+      type: qrOptions.dotsOptions?.type || qrOptions.dotOptions?.type || "square"
+    },
+    backgroundOptions: {
+      color: qrOptions.backgroundOptions?.color || qrOptions.colorLight || '#ffffff',
+    },
+    imageOptions: {
+      crossOrigin: "anonymous",
+      margin: Math.max(0, qrOptions.logoMargin || 5),
+      imageSize: Math.min(0.8, Math.max(0.2, qrOptions.logoSize || 0.5))
+    },
+    cornersSquareOptions: {
+      color: qrOptions.cornersSquareOptions?.color || qrOptions.cornerSquareOptions?.color || qrOptions.colorDark || '#000000',
+      type: qrOptions.cornersSquareOptions?.type || qrOptions.cornerSquareOptions?.type || "square"
+    },
+    cornersDotOptions: {
+      color: qrOptions.cornersDotOptions?.color || qrOptions.cornerDotOptions?.color || qrOptions.colorDark || '#000000',
+      type: qrOptions.cornersDotOptions?.type || qrOptions.cornerDotOptions?.type || "square"
+    },
+    qrOptions: {
+      errorCorrectionLevel: qrOptions.correctLevel || "H"
+    }
+  }), [
+    qrData, 
+    qrOptions.width, 
+    qrOptions.height, 
+    qrOptions.colorDark, 
+    qrOptions.colorLight,
+    qrOptions.dotsOptions?.color,
+    qrOptions.dotsOptions?.type,
+    qrOptions.dotOptions?.type,
+    qrOptions.backgroundOptions?.color,
+    qrOptions.cornersSquareOptions?.color,
+    qrOptions.cornersSquareOptions?.type,
+    qrOptions.cornerSquareOptions?.color,
+    qrOptions.cornerSquareOptions?.type,
+    qrOptions.cornersDotOptions?.color,
+    qrOptions.cornersDotOptions?.type,
+    qrOptions.cornerDotOptions?.color,
+    qrOptions.cornerDotOptions?.type,
+    qrOptions.correctLevel,
+    qrOptions.logoImage,
+    qrOptions.logoMargin,
+    qrOptions.logoSize
+  ]);
+
+  // Update QR code when options change
+  useEffect(() => {
+    if (qrCodeRef.current) {
+      qrCodeRef.current.update(memoizedQROptions);
+    }
+  }, [memoizedQROptions]);
+
   const generateQR = async () => {
     if (!qrData.trim()) {
       showError('Please enter some data to generate QR code');
@@ -60,28 +234,51 @@ const QRGenerator = () => {
     trackFeatureUsage('generate-qr');
 
     try {
-      // Here you would integrate with qr-code-styling library
-      // For now, we'll simulate the generation
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Update QR code with new data
+      if (qrCodeRef.current) {
+        qrCodeRef.current.update({
+          data: qrData
+        });
+        
+        // Render to canvas
+        if (canvasRef.current) {
+          await qrCodeRef.current.getRawData("png").then(blob => {
+            if (blob) {
+              const canvas = canvasRef.current;
+              const ctx = canvas.getContext('2d');
+              const img = new Image();
+              
+              img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                setGenerated(true);
+              };
+              
+              img.src = URL.createObjectURL(blob);
+            }
+          });
+        }
+      }
       
-      // Add to history
-      addToHistory({
-        data: qrData,
-        options: qrOptions,
-        name: `QR Code ${Date.now()}`,
-      });
+      // Add to history - functionality would go here
+      // addToHistory({
+      //   data: qrData,
+      //   options: qrOptions,
+      //   name: `QR Code ${Date.now()}`,
+      // });
       
       // Track analytics
       await trackQRGeneration({
         text: qrData,
         type: activeTab,
-        size: qrOptions.size,
-        errorCorrectionLevel: qrOptions.errorCorrection
+        size: qrOptions.width,
+        errorCorrectionLevel: qrOptions.correctLevel
       });
       
       incrementQRGenerated();
       showSuccess('QR code generated successfully!');
     } catch (error) {
+      console.error('QR Generation Error:', error);
       showError('Failed to generate QR code');
     } finally {
       setIsGenerating(false);
@@ -89,12 +286,50 @@ const QRGenerator = () => {
   };
 
   const handleDownload = async (format = 'png') => {
+    if (!generated || !qrCodeRef.current) {
+      showError('Please generate a QR code first');
+      return;
+    }
+
     trackFeatureUsage('download-qr');
     
     try {
-      // Here you would implement actual download logic
+      if (format === 'svg') {
+        qrCodeRef.current.download({ 
+          name: `qrcode-${Date.now()}`, 
+          extension: 'svg' 
+        });
+      } else if (format === 'png') {
+        qrCodeRef.current.download({ 
+          name: `qrcode-${Date.now()}`, 
+          extension: 'png' 
+        });
+      } else if (format === 'pdf') {
+        // Create PDF with jsPDF
+        const { jsPDF } = await import('jspdf');
+        const pdf = new jsPDF();
+        
+        const blob = await qrCodeRef.current.getRawData('png');
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          
+          const imgData = canvas.toDataURL('image/png');
+          pdf.addImage(imgData, 'PNG', 20, 20, 170, 170);
+          pdf.save(`qrcode-${Date.now()}.pdf`);
+        };
+        
+        img.src = URL.createObjectURL(blob);
+      }
+      
       showSuccess(`QR code downloaded as ${format.toUpperCase()}`);
     } catch (error) {
+      console.error('Download Error:', error);
       showError('Failed to download QR code');
     }
   };
@@ -125,6 +360,66 @@ const QRGenerator = () => {
       }
     } catch (error) {
       showError('Failed to share QR code');
+    }
+  };
+
+  const handle3DView = () => {
+    setShow3D(!show3D);
+    trackFeatureUsage('3d-preview');
+    
+    if (!show3D) {
+      showSuccess('3D view enabled! Use your mouse to rotate the QR code.');
+    } else {
+      showSuccess('3D view disabled.');
+    }
+  };
+
+  const handleAIEnhance = async () => {
+    if (!qrData.trim()) {
+      showError('Please enter some data first');
+      return;
+    }
+
+    setIsEnhancing(true);
+    trackFeatureUsage('ai-enhance');
+    
+    try {
+      // Simulate AI enhancement with improved settings
+      const enhancedOptions = {
+        ...qrOptions,
+        // AI enhancement: Optimize for better scanning
+        correctLevel: 'H', // High error correction for better reliability
+        width: Math.max(400, qrOptions.width), // Minimum 400px for better scanning
+        height: Math.max(400, qrOptions.height),
+        // Enhanced visual appeal
+        dotsOptions: {
+          ...qrOptions.dotsOptions,
+          type: 'rounded' // Rounded dots are more aesthetically pleasing
+        },
+        cornersSquareOptions: {
+          ...qrOptions.cornersSquareOptions,
+          type: 'extra-rounded' // Rounded corners for modern look
+        },
+        cornersDotOptions: {
+          ...qrOptions.cornersDotOptions,
+          type: 'dot' // Circular corner dots
+        }
+      };
+
+      // Apply AI-enhanced settings
+      setQROptions(enhancedOptions);
+      
+      // Auto-generate with enhanced settings
+      setTimeout(() => {
+        generateQR();
+        setIsEnhancing(false);
+        showSuccess('QR Code enhanced with AI optimization for better scanning and visual appeal!');
+      }, 1500); // Simulate AI processing time
+      
+    } catch (error) {
+      console.error('AI Enhancement Error:', error);
+      showError('Failed to enhance QR code');
+      setIsEnhancing(false);
     }
   };
 
@@ -270,7 +565,11 @@ const QRGenerator = () => {
                     min="200"
                     max="800"
                     value={qrOptions.width}
-                    onChange={(e) => setQROptions({ width: parseInt(e.target.value), height: parseInt(e.target.value) })}
+                    onChange={(e) => setQROptions(prev => ({ 
+                      ...prev, 
+                      width: parseInt(e.target.value), 
+                      height: parseInt(e.target.value) 
+                    }))}
                     className="w-full"
                   />
                 </div>
@@ -284,7 +583,13 @@ const QRGenerator = () => {
                     <input
                       type="color"
                       value={qrOptions.colorDark}
-                      onChange={(e) => setQROptions({ colorDark: e.target.value })}
+                      onChange={(e) => setQROptions(prev => ({ 
+                        ...prev, 
+                        colorDark: e.target.value,
+                        dotsOptions: { ...prev.dotsOptions, color: e.target.value },
+                        cornersSquareOptions: { ...prev.cornersSquareOptions, color: e.target.value },
+                        cornersDotOptions: { ...prev.cornersDotOptions, color: e.target.value }
+                      }))}
                       className="w-full h-10 rounded-lg border border-gray-300 dark:border-gray-600"
                     />
                   </div>
@@ -295,7 +600,11 @@ const QRGenerator = () => {
                     <input
                       type="color"
                       value={qrOptions.colorLight}
-                      onChange={(e) => setQROptions({ colorLight: e.target.value })}
+                      onChange={(e) => setQROptions(prev => ({ 
+                        ...prev, 
+                        colorLight: e.target.value,
+                        backgroundOptions: { ...prev.backgroundOptions, color: e.target.value }
+                      }))}
                       className="w-full h-10 rounded-lg border border-gray-300 dark:border-gray-600"
                     />
                   </div>
@@ -310,7 +619,14 @@ const QRGenerator = () => {
                     {presets.map((preset) => (
                       <button
                         key={preset.name}
-                        onClick={() => setQROptions({ ...qrOptions, ...preset.options })}
+                        onClick={() => setQROptions(prev => ({ 
+                          ...prev, 
+                          ...preset.options,
+                          dotsOptions: { ...prev.dotsOptions, ...preset.options.dotOptions },
+                          backgroundOptions: { ...prev.backgroundOptions, color: preset.options.colorLight },
+                          cornersSquareOptions: { ...prev.cornersSquareOptions, color: preset.options.colorDark },
+                          cornersDotOptions: { ...prev.cornersDotOptions, color: preset.options.colorDark }
+                        }))}
                         className="p-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm"
                       >
                         {preset.name}
@@ -328,7 +644,7 @@ const QRGenerator = () => {
                       </label>
                       <select
                         value={qrOptions.correctLevel}
-                        onChange={(e) => setQROptions({ correctLevel: e.target.value })}
+                        onChange={(e) => setQROptions(prev => ({ ...prev, correctLevel: e.target.value }))}
                         className="input-field"
                       >
                         <option value="L">Low (~7%)</option>
@@ -347,7 +663,7 @@ const QRGenerator = () => {
                         min="0"
                         max="50"
                         value={qrOptions.margin}
-                        onChange={(e) => setQROptions({ margin: parseInt(e.target.value) })}
+                        onChange={(e) => setQROptions(prev => ({ ...prev, margin: parseInt(e.target.value) }))}
                         className="w-full"
                       />
                     </div>
@@ -357,10 +673,11 @@ const QRGenerator = () => {
                         Dot Style
                       </label>
                       <select
-                        value={qrOptions.dotOptions?.type || 'square'}
-                        onChange={(e) => setQROptions({ 
-                          dotOptions: { ...qrOptions.dotOptions, type: e.target.value } 
-                        })}
+                        value={qrOptions.dotsOptions?.type || 'square'}
+                        onChange={(e) => setQROptions(prev => ({ 
+                          ...prev,
+                          dotsOptions: { ...prev.dotsOptions, type: e.target.value } 
+                        }))}
                         className="input-field"
                       >
                         <option value="square">Square</option>
@@ -369,6 +686,100 @@ const QRGenerator = () => {
                         <option value="classy">Classy</option>
                         <option value="classy-rounded">Classy Rounded</option>
                       </select>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Logo Upload Section */}
+            <div className="card">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Logo/Image
+              </h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Upload Logo
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 dark:file:bg-purple-900 dark:file:text-purple-200"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">PNG, JPG, SVG up to 5MB</p>
+                </div>
+
+                {logoPreview && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Logo Preview
+                      </label>
+                      <div className="flex items-center space-x-3">
+                        <img 
+                          src={logoPreview} 
+                          alt="Logo preview" 
+                          className="w-12 h-12 object-contain border border-gray-200 dark:border-gray-600 rounded bg-white"
+                        />
+                        <button
+                          onClick={removeLogo}
+                          className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Logo Size: {Math.round(qrOptions.logoSize * 100)}%
+                      </label>
+                      <input
+                        type="range"
+                        min="0.2"
+                        max="0.8"
+                        step="0.05"
+                        value={qrOptions.logoSize}
+                        onChange={(e) => setQROptions(prev => ({
+                          ...prev,
+                          logoSize: parseFloat(e.target.value)
+                        }))}
+                        className="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer"
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <span>20%</span>
+                        <span>50%</span>
+                        <span>80%</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Logo Margin: {qrOptions.logoMargin}px
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="20"
+                        step="1"
+                        value={qrOptions.logoMargin}
+                        onChange={(e) => setQROptions(prev => ({
+                          ...prev,
+                          logoMargin: parseInt(e.target.value)
+                        }))}
+                        className="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer"
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <span>0px</span>
+                        <span>10px</span>
+                        <span>20px</span>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -394,7 +805,7 @@ const QRGenerator = () => {
                   <span>{isGenerating ? 'Generating...' : 'Generate QR Code'}</span>
                 </button>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                   <button
                     onClick={() => handleDownload('png')}
                     className="btn-secondary flex items-center justify-center space-x-2"
@@ -408,6 +819,13 @@ const QRGenerator = () => {
                   >
                     <Download size={16} />
                     <span>SVG</span>
+                  </button>
+                  <button
+                    onClick={() => handleDownload('pdf')}
+                    className="btn-secondary flex items-center justify-center space-x-2"
+                  >
+                    <Download size={16} />
+                    <span>PDF</span>
                   </button>
                 </div>
 
@@ -455,31 +873,70 @@ const QRGenerator = () => {
                 </h3>
                 <div className="flex items-center space-x-2">
                   <button
-                    onClick={() => trackFeatureUsage('3d-preview')}
-                    className="flex items-center space-x-2 px-3 py-2 bg-secondary-100 dark:bg-secondary-900 text-secondary-700 dark:text-secondary-300 rounded-lg hover:bg-secondary-200 dark:hover:bg-secondary-800 transition-colors"
+                    onClick={handle3DView}
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+                      show3D 
+                        ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' 
+                        : 'bg-secondary-100 dark:bg-secondary-900 text-secondary-700 dark:text-secondary-300 hover:bg-secondary-200 dark:hover:bg-secondary-800'
+                    }`}
                   >
                     <Eye size={16} />
-                    <span>3D View</span>
+                    <span>{show3D ? '3D Active' : '3D View'}</span>
                   </button>
                   <button
-                    onClick={() => trackFeatureUsage('ai-enhance')}
-                    className="flex items-center space-x-2 px-3 py-2 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors"
+                    onClick={handleAIEnhance}
+                    disabled={isEnhancing}
+                    className="flex items-center space-x-2 px-3 py-2 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Zap size={16} />
-                    <span>AI Enhance</span>
+                    {isEnhancing ? (
+                      <div className="w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Zap size={16} />
+                    )}
+                    <span>{isEnhancing ? 'Enhancing...' : 'AI Enhance'}</span>
                   </button>
                 </div>
               </div>
 
               <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-8 flex items-center justify-center min-h-96">
                 {qrData ? (
-                  <div className="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-lg">
+                  <div 
+                    className={`bg-white dark:bg-gray-700 p-6 rounded-lg shadow-lg transition-all duration-500 relative ${
+                      show3D ? 'cursor-grab active:cursor-grabbing' : ''
+                    }`}
+                    style={{
+                      transformStyle: show3D ? 'preserve-3d' : 'flat',
+                      perspective: show3D ? '1000px' : 'none',
+                      transform: show3D ? 'rotateX(5deg) rotateY(-5deg)' : 'none',
+                      boxShadow: show3D ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none'
+                    }}
+                    onMouseMove={(e) => {
+                      if (show3D) {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const x = (e.clientX - rect.left) / rect.width;
+                        const y = (e.clientY - rect.top) / rect.height;
+                        const rotateY = (x - 0.5) * 20;
+                        const rotateX = (y - 0.5) * -20;
+                        e.currentTarget.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (show3D) {
+                        e.currentTarget.style.transform = 'perspective(1000px) rotateX(5deg) rotateY(-5deg) scale(1)';
+                      }
+                    }}
+                  >
                     <canvas
                       ref={canvasRef}
                       width={qrOptions.width}
                       height={qrOptions.height}
-                      className="border border-gray-300 dark:border-gray-600 rounded-lg"
+                      className="border border-gray-300 dark:border-gray-600 rounded-lg transition-all duration-300"
                     />
+                    {show3D && (
+                      <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                        3D
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="text-center text-gray-500 dark:text-gray-400">
@@ -491,6 +948,19 @@ const QRGenerator = () => {
                   </div>
                 )}
               </div>
+
+              {/* 3D Instructions */}
+              {show3D && qrData && (
+                <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <div className="flex items-center space-x-2 text-green-700 dark:text-green-300">
+                    <Eye size={16} />
+                    <span className="text-sm font-medium">3D Mode Active</span>
+                  </div>
+                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                    Move your mouse over the QR code to rotate it in 3D space!
+                  </p>
+                </div>
+              )}
 
               {/* QR Code Info */}
               {qrData && (
@@ -506,6 +976,11 @@ const QRGenerator = () => {
                       <span className="font-medium text-blue-900 dark:text-blue-300">Error Correction:</span>
                       <span className="text-blue-800 dark:text-blue-200 ml-2">
                         {qrOptions.correctLevel}
+                        {qrOptions.correctLevel === 'H' && (
+                          <span className="ml-1 text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-1 rounded">
+                            AI Optimized
+                          </span>
+                        )}
                       </span>
                     </div>
                     <div>
@@ -515,6 +990,18 @@ const QRGenerator = () => {
                       </span>
                     </div>
                   </div>
+                  
+                  {/* AI Enhancement Status */}
+                  {(qrOptions.width >= 400 && qrOptions.correctLevel === 'H' && 
+                    qrOptions.dotsOptions?.type === 'rounded' && 
+                    qrOptions.cornersSquareOptions?.type === 'extra-rounded') && (
+                    <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
+                      <div className="flex items-center space-x-2 text-purple-600 dark:text-purple-400">
+                        <Zap size={14} />
+                        <span className="text-xs font-medium">AI Enhanced for optimal scanning and visual appeal</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

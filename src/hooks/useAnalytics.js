@@ -44,9 +44,9 @@ export const useAnalytics = () => {
 
   // Test Firebase connectivity
   const testConnection = async () => {
-    console.log('Testing Firebase connection...');
+    // Testing Firebase connection silently
     const result = await testFirebaseConnection();
-    console.log('Connection test result:', result);
+    // Connection test completed
     return result;
   };
 

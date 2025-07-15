@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
   QrCode, 
@@ -13,9 +12,11 @@ import {
   Shield,
   Zap
 } from 'lucide-react';
+import { useAdmin } from '../../contexts/AdminContext';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const { isAdmin } = useAdmin();
 
   const footerSections = [
     {
@@ -24,7 +25,8 @@ const Footer = () => {
         { label: 'QR Generator', href: '/generator' },
         { label: 'QR Scanner', href: '/scanner' },
         { label: 'Templates', href: '/templates' },
-        { label: 'Analytics', href: '/analytics' },
+        // Only show Analytics to admin users
+        ...(isAdmin ? [{ label: 'Analytics', href: '/analytics' }] : []),
         { label: 'Collaboration', href: '/collaboration' },
       ],
     },

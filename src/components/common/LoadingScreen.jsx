@@ -1,4 +1,3 @@
-import React from 'react';
 import { QrCode, Sparkles, Zap } from 'lucide-react';
 
 const LoadingScreen = () => {

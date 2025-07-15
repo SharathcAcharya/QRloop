@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Wifi, WifiOff, AlertCircle } from 'lucide-react';
 import testFirebaseConnection from '../../config/testFirebase';
 

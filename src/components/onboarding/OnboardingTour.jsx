@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X, ArrowRight, ArrowLeft, Target, Zap, Eye, Users, Check } from 'lucide-react';
-import { useNotificationStore } from '../../stores/notificationStore';
 
 const OnboardingTour = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
-  const { completeTour } = useNotificationStore();
+
+  const completeTour = () => {
+    // Track tour completion - analytics would go here
+  };
 
   const steps = [
     {

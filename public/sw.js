@@ -29,6 +29,19 @@ self.addEventListener('install', (event) => {
 
 // Fetch event - serve from cache when offline
 self.addEventListener('fetch', (event) => {
+  // Skip cross-origin requests and development specific URLs
+  if (!event.request.url.startsWith(self.location.origin) ||
+      event.request.url.includes('?') ||
+      event.request.url.includes('vite') ||
+      event.request.url.includes('__vite') ||
+      event.request.url.includes('node_modules') ||
+      event.request.url.includes('.hot-update.') ||
+      event.request.url.includes('sockjs-node') ||
+      event.request.url.includes('webpack') ||
+      event.request.method !== 'GET') {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
@@ -52,6 +65,19 @@ self.addEventListener('fetch', (event) => {
             });
 
           return response;
+        }).catch((error) => {
+          console.log('Fetch failed; returning offline page instead.', error);
+          
+          // Return a basic fallback for navigation requests
+          if (event.request.destination === 'document') {
+            return caches.match('/');
+          }
+          
+          // For other requests, just fail gracefully
+          return new Response('Service Unavailable', {
+            status: 503,
+            statusText: 'Service Unavailable'
+          });
         });
       })
   );

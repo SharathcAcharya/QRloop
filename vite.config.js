@@ -64,17 +64,69 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: true,
+    host: true,
+    hmr: {
+      overlay: false
+    }
   },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
+    sourcemap: false,
+    minify: 'terser',
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          three: ['three', '@react-three/fiber', '@react-three/drei'],
-          qr: ['qr-code-styling'],
+        manualChunks: (id) => {
+          // React ecosystem
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'react-vendor';
+          }
+          
+          // Router
+          if (id.includes('node_modules/react-router') || id.includes('node_modules/@remix-run')) {
+            return 'router';
+          }
+          
+          // QR libraries
+          if (id.includes('qr-code-styling') || id.includes('jsqr') || id.includes('qrcode')) {
+            return 'qr-libs';
+          }
+          
+          // Charts and visualization
+          if (id.includes('recharts') || id.includes('d3') || id.includes('victory')) {
+            return 'charts';
+          }
+          
+          // Firebase
+          if (id.includes('firebase') || id.includes('@firebase')) {
+            return 'firebase';
+          }
+          
+          // PDF and canvas
+          if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('canvas')) {
+            return 'pdf-canvas';
+          }
+          
+          // UI libraries
+          if (id.includes('lucide-react') || id.includes('react-hot-toast') || id.includes('react-dropzone')) {
+            return 'ui-libs';
+          }
+          
+          // Utility libraries
+          if (id.includes('lodash') || id.includes('date-fns') || id.includes('uuid')) {
+            return 'utils';
+          }
+          
+          // State management (if any Zustand remains)
+          if (id.includes('zustand') || id.includes('redux')) {
+            return 'state';
+          }
+          
+          // Core vendor libraries
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
         },
       },
     },
