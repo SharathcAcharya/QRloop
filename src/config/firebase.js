@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, connectFirestoreEmulator, enableNetwork, disableNetwork } from 'firebase/firestore';
+import { getFirestore, connectFirestoreEmulator, enableNetwork, disableNetwork, collection, query, limit } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 
@@ -91,15 +91,24 @@ const initializeAnalytics = async () => {
   }
   
   try {
+    // Check if analytics is supported and not blocked
     const supported = await isSupported();
-    if (supported && !navigator.userAgent.includes('Prerender')) {
-      analytics = getAnalytics(app);
-      console.log('Analytics initialized successfully');
-    } else {
-      console.log('Analytics not supported or prerendering detected');
+    if (!supported) {
+      console.log('Analytics not supported in this environment');
+      return;
     }
+    
+    if (navigator.userAgent.includes('Prerender') || navigator.userAgent.includes('bot')) {
+      console.log('Analytics not initialized - prerendering or bot detected');
+      return;
+    }
+    
+    // Try to initialize analytics with error handling
+    analytics = getAnalytics(app);
+    console.log('Analytics initialized successfully');
   } catch (error) {
     console.warn('Analytics initialization failed:', error.message);
+    // Don't throw error, just continue without analytics
     analytics = null;
   }
 };
@@ -126,8 +135,14 @@ export const testFirebaseConnection = async () => {
   }
   
   try {
-    // Try to enable network (this will fail if blocked)
+    // Try a simple operation first
     await enableNetwork(db);
+    
+    // Test actual Firestore access with a lightweight operation
+    const testCollection = collection(db, 'connection_test');
+    // Just check if we can create a query (doesn't actually execute)
+    query(testCollection, limit(1));
+    
     isFirebaseConnected = true;
     notifyConnectionListeners(true);
     return { success: true, message: 'Firebase connection successful' };
@@ -136,17 +151,37 @@ export const testFirebaseConnection = async () => {
     isFirebaseConnected = false;
     notifyConnectionListeners(false);
     
-    if (error.code === 'failed-precondition' || error.message.includes('blocked') || error.message.includes('invalid')) {
+    // Check for various types of connection issues
+    if (error.message?.includes('blocked') || 
+        error.message?.includes('ERR_BLOCKED_BY_CLIENT') ||
+        error.code === 'resource-exhausted' ||
+        error.message?.includes('missing stream token')) {
       return { 
         success: false, 
-        error: 'Connection blocked by browser extension, ad blocker, or invalid configuration',
-        suggestion: 'Please disable ad blocker for this site, check Firebase configuration, or use offline mode'
+        error: 'Connection blocked by browser extension, ad blocker, or network restriction',
+        suggestion: 'Please disable ad blocker for this site, try incognito mode, or use offline mode'
+      };
+    }
+    
+    if (error.code === 'permission-denied') {
+      return {
+        success: false,
+        error: 'Firebase access denied - check security rules',
+        suggestion: 'Verify Firebase security rules allow access to the required collections'
+      };
+    }
+    
+    if (error.code === 'unavailable') {
+      return {
+        success: false,
+        error: 'Firebase service temporarily unavailable',
+        suggestion: 'Check your internet connection and try again later'
       };
     }
     
     return { 
       success: false, 
-      error: error.message,
+      error: error.message || 'Unknown connection error',
       suggestion: 'Check your internet connection and Firebase configuration'
     };
   }

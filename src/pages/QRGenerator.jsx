@@ -20,6 +20,8 @@ import {
 
 const QRGenerator = () => {
   // Local state to replace store
+  const [connectionStatus, setConnectionStatus] = useState('connected');
+  const [firebaseConnected, setFirebaseConnected] = useState(true);
   const [qrData, setQRData] = useState('https://qrloop.com');
   const [qrOptions, setQROptions] = useState({
     width: 300,
@@ -188,8 +190,6 @@ const QRGenerator = () => {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [show3D, setShow3D] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
-  const [firebaseConnected, setFirebaseConnected] = useState(true);
-  const [connectionStatus, setConnectionStatus] = useState('connected');
   const canvasRef = useRef(null);
   const qrCodeRef = useRef(null);
   const [generated, setGenerated] = useState(false);

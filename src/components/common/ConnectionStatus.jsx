@@ -84,6 +84,8 @@ const ConnectionStatus = ({ className = '' }) => {
 
   const statusIcon = connectionState.isConnected ? (
     <CheckCircle className="w-4 h-4 text-green-500" />
+  ) : connectionState.error?.includes('blocked') ? (
+    <AlertTriangle className="w-4 h-4 text-orange-500" />
   ) : connectionState.error ? (
     <AlertTriangle className="w-4 h-4 text-yellow-500" />
   ) : (
@@ -92,12 +94,16 @@ const ConnectionStatus = ({ className = '' }) => {
 
   const statusText = connectionState.isConnected 
     ? 'Connected' 
+    : connectionState.error?.includes('blocked')
+    ? 'Blocked'
     : connectionState.error 
     ? 'Limited' 
     : 'Offline';
 
   const statusColor = connectionState.isConnected 
     ? 'text-green-600' 
+    : connectionState.error?.includes('blocked')
+    ? 'text-orange-600'
     : connectionState.error 
     ? 'text-yellow-600' 
     : 'text-red-600';
@@ -117,6 +123,11 @@ const ConnectionStatus = ({ className = '' }) => {
           <div>
             <div className="font-medium">Firebase Connected</div>
             <div>All features available</div>
+          </div>
+        ) : connectionState.error?.includes('blocked') ? (
+          <div>
+            <div className="font-medium">Connection Blocked</div>
+            <div className="max-w-xs">Ad blocker or browser extension blocking Firebase</div>
           </div>
         ) : connectionState.error ? (
           <div>
