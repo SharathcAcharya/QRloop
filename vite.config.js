@@ -5,15 +5,23 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      // Ensure proper React handling
+      include: "**/*.{jsx,tsx}",
+      babel: {
+        plugins: [
+          // Add any babel plugins if needed
+        ]
+      }
+    }),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg', 'favicon.svg'],
       manifest: {
         name: 'QRloop - Advanced QR Code Generator',
         short_name: 'QRloop',
         description: 'Professional QR code generator with 3D visualization and AI enhancement',
-        theme_color: '#000000',
+        theme_color: '#6366f1',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait-primary',
@@ -33,7 +41,9 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\//,
@@ -53,6 +63,18 @@ export default defineConfig({
               },
             },
           },
+          {
+            urlPattern: /^https:\/\/firestore\.googleapis\.com\//,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'firebase-cache',
+              networkTimeoutSeconds: 3,
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24, // 1 day
+              },
+            },
+          },
         ],
       },
     }),
@@ -69,6 +91,20 @@ export default defineConfig({
       overlay: false
     }
   },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'firebase/app',
+      'firebase/auth',
+      'firebase/firestore',
+      'firebase/storage',
+      'qr-code-styling',
+      'lucide-react'
+    ],
+    exclude: ['firebase/analytics']
+  },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -76,57 +112,29 @@ export default defineConfig({
     minify: 'terser',
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
+      external: [],
       output: {
-        manualChunks: (id) => {
-          // React ecosystem
-          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
-            return 'react-vendor';
-          }
+        manualChunks: {
+          // React core - keep together to avoid version conflicts
+          'react-vendor': ['react', 'react-dom'],
           
           // Router
-          if (id.includes('node_modules/react-router') || id.includes('node_modules/@remix-run')) {
-            return 'router';
-          }
+          'router': ['react-router-dom'],
           
           // QR libraries
-          if (id.includes('qr-code-styling') || id.includes('jsqr') || id.includes('qrcode')) {
-            return 'qr-libs';
-          }
-          
-          // Charts and visualization
-          if (id.includes('recharts') || id.includes('d3') || id.includes('victory')) {
-            return 'charts';
-          }
+          'qr-libs': ['qr-code-styling', 'jsqr'],
           
           // Firebase
-          if (id.includes('firebase') || id.includes('@firebase')) {
-            return 'firebase';
-          }
+          'firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
           
           // PDF and canvas
-          if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('canvas')) {
-            return 'pdf-canvas';
-          }
+          'pdf-canvas': ['jspdf', 'html2canvas'],
           
           // UI libraries
-          if (id.includes('lucide-react') || id.includes('react-hot-toast') || id.includes('react-dropzone')) {
-            return 'ui-libs';
-          }
+          'ui-libs': ['lucide-react', 'react-hot-toast', 'react-dropzone', 'framer-motion'],
           
-          // Utility libraries
-          if (id.includes('lodash') || id.includes('date-fns') || id.includes('uuid')) {
-            return 'utils';
-          }
-          
-          // State management (if any Zustand remains)
-          if (id.includes('zustand') || id.includes('redux')) {
-            return 'state';
-          }
-          
-          // Core vendor libraries
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
+          // Vendor (everything else)
+          'vendor': ['workbox-window', 'file-saver', 'papaparse']
         },
       },
     },

@@ -4,28 +4,27 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
 
-// Service Worker management
-if ('serviceWorker' in navigator) {
-  // Always unregister existing service workers in development
-  navigator.serviceWorker.getRegistrations().then((registrations) => {
-    for (const registration of registrations) {
-      registration.unregister();
-      // Service worker unregistered
+// Register service worker (handled by vite-plugin-pwa)
+import { registerSW } from 'virtual:pwa-register';
+
+// Service Worker registration with error handling
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  const updateSW = registerSW({
+    onNeedRefresh() {
+      // Show update available notification
+      console.log('New content available, please refresh.');
+    },
+    onOfflineReady() {
+      // Show offline ready notification
+      console.log('App is ready to work offline.');
+    },
+    onRegisterError(error) {
+      console.error('SW registration error:', error);
     }
   });
 
-  // Only register in production
-  if (import.meta.env.PROD) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then((_registration) => {
-          // Service worker registered successfully
-        })
-        .catch((_registrationError) => {
-          // Service worker registration failed
-        });
-    });
-  }
+  // Optional: Auto update
+  // updateSW(true);
 }
 
 const root = createRoot(document.getElementById('root'));

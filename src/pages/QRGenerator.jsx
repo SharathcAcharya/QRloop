@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import QRCodeStyling from 'qr-code-styling';
+import { testFirebaseConnection, addConnectionListener, removeConnectionListener, goOffline, goOnline, isConnected } from '../config/firebase';
+import { qrHistory, offlineData } from '../utils/localStorage';
 import { 
   Type, 
   Link2, 
@@ -11,7 +13,9 @@ import {
   RefreshCw,
   Copy,
   Check,
-  X
+  X,
+  WifiOff,
+  Wifi
 } from 'lucide-react';
 
 const QRGenerator = () => {
@@ -55,20 +59,89 @@ const QRGenerator = () => {
   };
   
   const incrementQRGenerated = () => {
-    // QR generation analytics would go here
+    // QR generation analytics - save offline if Firebase is blocked
+    if (firebaseConnected) {
+      // Online: send to Firebase (implementation would go here)
+      console.log('Incrementing QR generated count in Firebase');
+    } else {
+      // Offline: save to localStorage
+      offlineData.saveAnalytics({
+        type: 'qr_generated',
+        timestamp: new Date().toISOString()
+      });
+      console.log('Saved QR generation to offline storage');
+    }
   };
   
-  const trackFeatureUsage = (_feature) => {
-    // Feature tracking would go here
+  const trackFeatureUsage = (feature) => {
+    // Feature tracking - save offline if Firebase is blocked
+    if (firebaseConnected) {
+      // Online: send to Firebase (implementation would go here)
+      console.log(`Tracking feature usage: ${feature} in Firebase`);
+    } else {
+      // Offline: save to localStorage
+      offlineData.saveAnalytics({
+        type: 'feature_usage',
+        feature,
+        timestamp: new Date().toISOString()
+      });
+      console.log(`Saved feature usage (${feature}) to offline storage`);
+    }
   };
   
-  const trackQRGeneration = (_data) => {
-    // QR generation analytics would go here
+  const trackQRGeneration = async (data) => {
+    // QR generation analytics - save offline if Firebase is blocked
+    if (firebaseConnected) {
+      // Online: send to Firebase (implementation would go here)
+      console.log('Tracking QR generation in Firebase:', data);
+    } else {
+      // Offline: save to localStorage
+      offlineData.saveQRGeneration({
+        type: 'qr_generation',
+        data,
+        timestamp: new Date().toISOString()
+      });
+      console.log('Saved QR generation data to offline storage:', data);
+    }
   };
   
-  const testConnection = () => {
-    // Connection test would go here
+  const testConnection = async () => {
+    const result = await testFirebaseConnection();
+    setConnectionStatus(result.success ? 'connected' : 'blocked');
+    return result;
   };
+
+  const toggleConnectionMode = async () => {
+    if (firebaseConnected) {
+      const success = await goOffline();
+      if (success) {
+        setConnectionStatus('offline');
+        showSuccess('Switched to offline mode');
+      }
+    } else {
+      const success = await goOnline();
+      if (success) {
+        setConnectionStatus('connected');
+        showSuccess('Connected to Firebase');
+      } else {
+        setConnectionStatus('blocked');
+        showError('Connection blocked. Please check your browser settings.');
+      }
+    }
+  };
+
+  // Firebase connection listener
+  useEffect(() => {
+    const handleConnectionChange = (connected) => {
+      setFirebaseConnected(connected);
+      if (!connected && connectionStatus === 'connected') {
+        setConnectionStatus('blocked');
+      }
+    };
+
+    addConnectionListener(handleConnectionChange);
+    return () => removeConnectionListener(handleConnectionChange);
+  }, [connectionStatus]);
 
   // Logo image handling
   const handleLogoUpload = (event) => {
@@ -115,6 +188,8 @@ const QRGenerator = () => {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [show3D, setShow3D] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [firebaseConnected, setFirebaseConnected] = useState(true);
+  const [connectionStatus, setConnectionStatus] = useState('connected');
   const canvasRef = useRef(null);
   const qrCodeRef = useRef(null);
   const [generated, setGenerated] = useState(false);
@@ -260,12 +335,12 @@ const QRGenerator = () => {
         }
       }
       
-      // Add to history - functionality would go here
-      // addToHistory({
-      //   data: qrData,
-      //   options: qrOptions,
-      //   name: `QR Code ${Date.now()}`,
-      // });
+      // Add to history - save to localStorage
+      const historyEntry = qrHistory.add({
+        data: qrData,
+        options: qrOptions,
+        name: `QR Code ${Date.now()}`,
+      });
       
       // Track analytics
       await trackQRGeneration({
@@ -464,6 +539,47 @@ const QRGenerator = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Connection Issue Banner */}
+          {connectionStatus === 'blocked' && (
+            <div className="lg:col-span-3 mb-6">
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <WifiOff className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5" />
+                  <div className="flex-1">
+                    <h3 className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                      Firebase Connection Blocked
+                    </h3>
+                    <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                      Your browser or an extension is blocking Firebase requests. The app will work in offline mode, but some features may be limited.
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button
+                        onClick={() => {
+                          showSuccess('Try disabling ad blockers, privacy extensions, or adding this site to your allowlist.');
+                        }}
+                        className="text-xs bg-amber-100 dark:bg-amber-800 text-amber-800 dark:text-amber-200 px-2 py-1 rounded hover:bg-amber-200 dark:hover:bg-amber-700"
+                      >
+                        Show Solutions
+                      </button>
+                      <button
+                        onClick={toggleConnectionMode}
+                        className="text-xs bg-amber-100 dark:bg-amber-800 text-amber-800 dark:text-amber-200 px-2 py-1 rounded hover:bg-amber-200 dark:hover:bg-amber-700"
+                      >
+                        Switch to Offline Mode
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setConnectionStatus('dismissed')}
+                    className="text-amber-400 hover:text-amber-600 dark:text-amber-500 dark:hover:text-amber-300"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Left Column - Controls */}
           <div className="lg:col-span-1 space-y-6">
             {/* Data Type Selection */}
@@ -838,7 +954,19 @@ const QRGenerator = () => {
                     <span>Share</span>
                   </button>
                   <button
-                    onClick={() => trackFeatureUsage('save-qr')}
+                    onClick={() => {
+                      if (qrData && generated) {
+                        const saved = qrHistory.add({
+                          data: qrData,
+                          options: qrOptions,
+                          name: `QR Code ${new Date().toLocaleString()}`,
+                        });
+                        trackFeatureUsage('save-qr');
+                        showSuccess(`QR Code saved to history as "${saved.name}"`);
+                      } else {
+                        showError('Please generate a QR code first');
+                      }
+                    }}
                     className="btn-outline flex items-center justify-center space-x-2"
                   >
                     <Save size={16} />
@@ -846,20 +974,53 @@ const QRGenerator = () => {
                   </button>
                 </div>
 
-                {/* Firebase Connection Test - Remove in production */}
-                <button
-                  onClick={async () => {
-                    const result = await testConnection();
-                    if (result.success) {
-                      showSuccess('Firebase connection successful!');
-                    } else {
-                      showError(`Firebase connection failed: ${result.error}`);
-                    }
-                  }}
-                  className="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm"
-                >
-                  Test Firebase Connection
-                </button>
+                {/* Firebase Connection Status & Controls */}
+                <div className="space-y-2">
+                  <div className={`flex items-center justify-between p-3 rounded-lg border ${
+                    connectionStatus === 'connected' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' :
+                    connectionStatus === 'blocked' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' :
+                    'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+                  }`}>
+                    <div className="flex items-center space-x-2">
+                      {connectionStatus === 'connected' ? (
+                        <Wifi size={16} className="text-green-600 dark:text-green-400" />
+                      ) : (
+                        <WifiOff size={16} className="text-red-600 dark:text-red-400" />
+                      )}
+                      <span className={`text-sm font-medium ${
+                        connectionStatus === 'connected' ? 'text-green-700 dark:text-green-300' :
+                        connectionStatus === 'blocked' ? 'text-red-700 dark:text-red-300' :
+                        'text-yellow-700 dark:text-yellow-300'
+                      }`}>
+                        {connectionStatus === 'connected' ? 'Online' :
+                         connectionStatus === 'blocked' ? 'Blocked' : 'Offline'}
+                      </span>
+                    </div>
+                    <button
+                      onClick={toggleConnectionMode}
+                      className={`text-xs px-2 py-1 rounded ${
+                        connectionStatus === 'connected' ? 'bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200' :
+                        'bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200'
+                      }`}
+                    >
+                      {firebaseConnected ? 'Go Offline' : 'Reconnect'}
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={async () => {
+                      const result = await testConnection();
+                      if (result.success) {
+                        showSuccess('Firebase connection successful!');
+                      } else {
+                        showError(result.suggestion || result.error);
+                      }
+                    }}
+                    className="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm"
+                  >
+                    Test Firebase Connection
+                  </button>
+                </div>
               </div>
             </div>
           </div>
