@@ -20,6 +20,13 @@ export class AnalyticsService {
   // Track QR Code Generation
   static async trackQRGeneration(qrData) {
     try {
+      // Check if database is available
+      if (!db) {
+        console.warn('Firebase database not available, storing analytics locally');
+        this.storeAnalyticsLocally('qr_generation', qrData);
+        return { success: true, stored: 'locally' };
+      }
+
       // Filter out undefined values and provide defaults
       const cleanData = {
         text: qrData.text || '',
@@ -42,19 +49,29 @@ export class AnalyticsService {
       
       return { success: true, id: docRef.id };
     } catch (error) {
-      console.error('Error tracking QR generation:', error);
+      console.error('❌ Firebase connection failed:', error);
       console.error('Error details:', {
         code: error.code,
         message: error.message,
         stack: error.stack
       });
-      return { success: false, error: error.message };
+      
+      // Store locally as fallback
+      this.storeAnalyticsLocally('qr_generation', qrData);
+      return { success: false, error: error.message, stored: 'locally' };
     }
   }
 
   // Track QR Code Scan
   static async trackQRScan(scanData) {
     try {
+      // Check if database is available
+      if (!db) {
+        console.warn('Firebase database not available, storing analytics locally');
+        this.storeAnalyticsLocally('qr_scan', scanData);
+        return { success: true, stored: 'locally' };
+      }
+
       // Filter out undefined values and provide defaults
       const cleanData = {
         scannedContent: scanData.scannedContent || scanData.content || '',
@@ -72,13 +89,19 @@ export class AnalyticsService {
       return { success: true, id: docRef.id };
     } catch (error) {
       console.error('Error tracking QR scan:', error);
-      return { success: false, error: error.message };
+      this.storeAnalyticsLocally('qr_scan', scanData);
+      return { success: false, error: error.message, stored: 'locally' };
     }
   }
 
   // Update daily statistics
   static async updateDailyStats(type, increment_value = 1) {
     try {
+      if (!db) {
+        console.warn('Database not available for updating stats');
+        return;
+      }
+
       const today = new Date().toISOString().split('T')[0];
       const statsRef = doc(db, 'daily_stats', today);
       
@@ -104,6 +127,11 @@ export class AnalyticsService {
   // Get analytics data for admin dashboard
   static async getAnalyticsData(timeRange = '30d') {
     try {
+      if (!db) {
+        console.warn('Database not available, returning local analytics data');
+        return this.getLocalAnalyticsData();
+      }
+
       const now = new Date();
       const daysBack = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
       const startDate = new Date(now.getTime() - (daysBack * 24 * 60 * 60 * 1000));
@@ -181,6 +209,11 @@ export class AnalyticsService {
   // Get user activity data
   static async getUserActivity(limit_count = 50) {
     try {
+      if (!db) {
+        console.warn('Database not available for user activity');
+        return { success: true, data: [] };
+      }
+
       const activityQuery = query(
         collection(db, 'user_activity'),
         orderBy('timestamp', 'desc'),
@@ -203,6 +236,12 @@ export class AnalyticsService {
   // Track user activity
   static async trackUserActivity(activityData) {
     try {
+      if (!db) {
+        console.warn('Database not available, storing activity locally');
+        this.storeAnalyticsLocally('user_activity', activityData);
+        return { success: true, stored: 'locally' };
+      }
+
       // Filter out undefined values and provide defaults
       const cleanData = {
         action: activityData.action || 'unknown',
@@ -215,7 +254,60 @@ export class AnalyticsService {
       return { success: true };
     } catch (error) {
       console.error('Error tracking user activity:', error);
-      return { success: false, error: error.message };
+      this.storeAnalyticsLocally('user_activity', activityData);
+      return { success: false, error: error.message, stored: 'locally' };
+    }
+  }
+
+  // Local storage fallback methods
+  static storeAnalyticsLocally(type, data) {
+    try {
+      const key = `qrloop_analytics_${type}`;
+      const existing = JSON.parse(localStorage.getItem(key) || '[]');
+      existing.push({
+        ...data,
+        timestamp: new Date().toISOString(),
+        id: Date.now().toString()
+      });
+      
+      // Keep only last 100 entries to prevent storage bloat
+      if (existing.length > 100) {
+        existing.splice(0, existing.length - 100);
+      }
+      
+      localStorage.setItem(key, JSON.stringify(existing));
+    } catch (error) {
+      console.error('Error storing analytics locally:', error);
+    }
+  }
+
+  static getLocalAnalyticsData() {
+    try {
+      const generations = JSON.parse(localStorage.getItem('qrloop_analytics_qr_generation') || '[]');
+      const scans = JSON.parse(localStorage.getItem('qrloop_analytics_qr_scan') || '[]');
+      
+      return {
+        totalGenerations: generations.length,
+        totalScans: scans.length,
+        avgGenerationsPerDay: generations.length / 30, // Rough estimate
+        avgScansPerDay: scans.length / 30,
+        totalUsers: 1, // Local user
+        recentGenerations: generations.slice(-10),
+        recentScans: scans.slice(-10),
+        dailyStats: []
+      };
+    } catch (error) {
+      console.error('Error getting local analytics:', error);
+      return {
+        totalGenerations: 0,
+        totalScans: 0,
+        avgGenerationsPerDay: 0,
+        avgScansPerDay: 0,
+        totalUsers: 0,
+        recentGenerations: [],
+        recentScans: [],
+        dailyStats: []
+      };
     }
   }
 }

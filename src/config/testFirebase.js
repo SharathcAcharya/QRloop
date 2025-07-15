@@ -4,6 +4,11 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 // Simple Firebase connection test
 export const testFirebaseConnection = async () => {
   try {
+    // Check if database is available
+    if (!db) {
+      return { success: false, error: 'Firebase database not initialized' };
+    }
+
     // Testing Firebase connection silently
     
     const testData = {

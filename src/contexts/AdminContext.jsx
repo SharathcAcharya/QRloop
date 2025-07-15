@@ -30,12 +30,25 @@ const AdminProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check if Firebase auth is available
+    if (!auth) {
+      console.warn('Firebase auth not available, using fallback admin state');
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // Check if user is admin
-        const adminDoc = await getDoc(doc(db, 'admins', user.uid));
-        setIsAdmin(adminDoc.exists());
-        setUser(user);
+      if (user && db) {
+        try {
+          // Check if user is admin
+          const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+          setIsAdmin(adminDoc.exists());
+          setUser(user);
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+          setIsAdmin(false);
+          setUser(user);
+        }
       } else {
         setUser(null);
         setIsAdmin(false);
@@ -47,6 +60,10 @@ const AdminProvider = ({ children }) => {
   }, []);
 
   const signIn = async (email, password) => {
+    if (!auth) {
+      return { success: false, error: 'Authentication service not available' };
+    }
+    
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
       return { success: true, user: result.user };
@@ -56,6 +73,10 @@ const AdminProvider = ({ children }) => {
   };
 
   const createAdmin = async (email, password, adminData) => {
+    if (!auth || !db) {
+      return { success: false, error: 'Firebase services not available' };
+    }
+    
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
       
@@ -74,6 +95,10 @@ const AdminProvider = ({ children }) => {
   };
 
   const signOutAdmin = async () => {
+    if (!auth) {
+      return { success: false, error: 'Authentication service not available' };
+    }
+    
     try {
       await signOut(auth);
       return { success: true };
