@@ -17,6 +17,8 @@ import AdminProtectedRoute from './components/common/AdminProtectedRoute';
 import Home from './pages/Home';
 
 // Lazy loaded pages (code splitting)
+const BatchGeneration = lazy(() => import('./pages/BatchGeneration'));
+const AIEnhancement = lazy(() => import('./pages/AIEnhancement'));
 const QRGenerator = lazy(() => import('./pages/QRGenerator'));
 const QRScanner = lazy(() => import('./pages/QRScanner'));
 const LibraryPage = lazy(() => import('./pages/Library'));
@@ -29,6 +31,9 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const AdminSetup = lazy(() => import('./pages/AdminSetup'));
+const Visualization3D = lazy(() => import('./pages/Visualization3D'));
+const CloudSynk = lazy(() => import('./pages/CloudSynk'));
+const TeamManagement = lazy(() => import('./pages/TeamManagement'));
 
 // Context Providers
 import AuthProvider from './contexts/AuthContext';
@@ -80,6 +85,7 @@ function App() {
         <AdminProvider>
           <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
             <Routes>
+            
               {/* Admin Routes */}
               <Route 
                 path="/admin/setup" 
@@ -140,6 +146,11 @@ function App() {
                           <Route path="/collaboration" element={<Collaboration />} />
                           <Route path="/settings" element={<Settings />} />
                           <Route path="/about" element={<About />} />
+                         <Route path="/visualization3d" element={<Visualization3D />} />
+                         <Route path="/features/batch" element={<BatchGeneration />} />
+                         <Route path="/features/ai" element={<AIEnhancement />} />
+                         <Route path="/features/cloudsynk" element={<CloudSynk />} />
+                         <Route path="/features/team" element={<TeamManagement />} />
                           <Route path="/404" element={<NotFound />} />
                           <Route path="*" element={<Navigate to="/404" replace />} />
                         </Routes>

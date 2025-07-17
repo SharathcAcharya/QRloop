@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Menu, 
   X, 
@@ -17,6 +17,7 @@ import ConnectionStatus from '../common/ConnectionStatus';
 
 const Navbar = ({ onMenuClick, isDarkMode, toggleDarkMode }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { isAdmin } = useAdmin();
   const [notifications] = useState([]);
   const [updateAvailable] = useState(false);
@@ -86,6 +87,16 @@ const Navbar = ({ onMenuClick, isDarkMode, toggleDarkMode }) => {
             >
               Library
             </Link>
+            <Link
+              to="/templates"
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                location.pathname === '/templates'
+                  ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400'
+              }`}
+            >
+              Templates
+            </Link>
             {/* Only show Analytics to admin users */}
             {isAdmin && (
               <Link
@@ -108,6 +119,16 @@ const Navbar = ({ onMenuClick, isDarkMode, toggleDarkMode }) => {
               }`}
             >
               Collaborate
+            </Link>
+            <Link
+              to="/about"
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                location.pathname === '/about'
+                  ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400'
+              }`}
+            >
+              About
             </Link>
           </div>
 
@@ -154,7 +175,10 @@ const Navbar = ({ onMenuClick, isDarkMode, toggleDarkMode }) => {
               )}
 
               {/* AI Enhancement */}
-              <button className="flex items-center space-x-1 px-3 py-1 bg-secondary-500 text-white rounded-lg text-sm font-medium hover:bg-secondary-600 transition-colors">
+              <button
+                className="flex items-center space-x-1 px-3 py-1 bg-secondary-500 text-white rounded-lg text-sm font-medium hover:bg-secondary-600 transition-colors"
+                onClick={() => navigate('/features/ai')}
+              >
                 <Zap size={16} />
                 <span>AI</span>
               </button>

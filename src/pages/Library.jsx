@@ -232,101 +232,91 @@ const LibraryPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-100 via-white to-green-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 py-0 flex items-center justify-center">
+      <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-12 flex flex-col gap-10">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
-                <LibraryIcon className="w-8 h-8 mr-3 text-blue-600" />
-                QR Library
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
-                Manage and organize your QR codes
-              </p>
-            </div>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors">
-              <FolderPlus className="w-4 h-4 mr-2" />
-              New Collection
-            </button>
+        <div className="flex flex-col items-center text-center gap-2 mb-2">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-blue-500 to-green-400 flex items-center justify-center shadow-lg mb-2">
+            <LibraryIcon className="w-8 h-8 text-white animate-pulse" />
           </div>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-800 dark:text-blue-100 tracking-tight drop-shadow-lg">QR Library</h1>
+          <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-200 max-w-2xl mt-2">
+            Manage, organize, and search your QR codes. Favorite, share, and download with ease.
+          </p>
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search QR codes..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+        <div className="bg-white/80 dark:bg-gray-800/80 rounded-3xl shadow-xl border border-blue-100 dark:border-blue-800 p-8 mb-6 flex flex-col md:flex-row gap-4 items-center">
+          {/* Search */}
+          <div className="flex-1 relative w-full">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search QR codes..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+            />
+          </div>
 
-            {/* Filter */}
-            <select
-              value={filterBy}
-              onChange={(e) => setFilterBy(e.target.value)}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All QR Codes</option>
-              <option value="favorites">Favorites</option>
-              <option value="recent">Recent</option>
-            </select>
+          {/* Filter */}
+          <select
+            value={filterBy}
+            onChange={(e) => setFilterBy(e.target.value)}
+            className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 text-base"
+          >
+            <option value="all">All QR Codes</option>
+            <option value="favorites">Favorites</option>
+            <option value="recent">Recent</option>
+          </select>
 
-            {/* Sort */}
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="date">Sort by Date</option>
-              <option value="name">Sort by Name</option>
-              <option value="type">Sort by Type</option>
-            </select>
+          {/* Sort */}
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 text-base"
+          >
+            <option value="date">Sort by Date</option>
+            <option value="name">Sort by Name</option>
+            <option value="type">Sort by Type</option>
+          </select>
 
-            {/* Sort Order */}
+          {/* Sort Order */}
+          <button
+            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-base"
+          >
+            {sortOrder === 'asc' ? <SortAsc className="w-5 h-5" /> : <SortDesc className="w-5 h-5" />}
+          </button>
+
+          {/* View Mode */}
+          <div className="flex border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
             <button
-              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+              onClick={() => setViewMode('grid')}
+              className={`px-4 py-3 ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600'} transition-colors`}
             >
-              {sortOrder === 'asc' ? <SortAsc className="w-4 h-4" /> : <SortDesc className="w-4 h-4" />}
+              <Grid className="w-5 h-5" />
             </button>
-
-            {/* View Mode */}
-            <div className="flex border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`px-3 py-2 ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600'} transition-colors`}
-              >
-                <Grid className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`px-3 py-2 ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600'} transition-colors`}
-              >
-                <List className="w-4 h-4" />
-              </button>
-            </div>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-4 py-3 ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600'} transition-colors`}
+            >
+              <List className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
         {/* Results */}
         <div className="mb-4 flex items-center justify-between">
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 dark:text-gray-400 text-base">
             {filteredQRs.length} QR codes found
           </p>
           {selectedItems.length > 0 && (
             <button
               onClick={handleBulkDelete}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors"
+              className="bg-red-600 hover:bg-red-700 text-white px-5 py-3 rounded-lg flex items-center transition-colors text-base"
             >
-              <Trash2 className="w-4 h-4 mr-2" />
+              <Trash2 className="w-5 h-5 mr-2" />
               Delete Selected ({selectedItems.length})
             </button>
           )}
@@ -334,13 +324,13 @@ const LibraryPage = () => {
 
         {/* QR Grid/List */}
         {viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {filteredQRs.map(qr => (
               <QRCard key={qr.id} qr={qr} />
             ))}
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {filteredQRs.map(qr => (
               <QRCard key={qr.id} qr={qr} />
             ))}
@@ -348,12 +338,12 @@ const LibraryPage = () => {
         )}
 
         {filteredQRs.length === 0 && (
-          <div className="text-center py-12">
-            <LibraryIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          <div className="text-center py-16">
+            <LibraryIcon className="w-20 h-20 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
               No QR codes found
             </h3>
-            <p className="text-gray-500 dark:text-gray-400">
+            <p className="text-gray-500 dark:text-gray-400 text-base">
               {searchTerm ? 'Try adjusting your search terms' : 'Create your first QR code to get started'}
             </p>
           </div>

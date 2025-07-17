@@ -350,54 +350,50 @@ const Collaboration = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Team Collaboration
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300">
-            Work together with your team in real-time collaborative workspaces
+    <div className="min-h-screen w-full bg-gradient-to-br from-green-100 via-white to-blue-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 py-0 flex items-center justify-center">
+      <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-12 flex flex-col gap-10">
+        {/* Header */}
+        <div className="flex flex-col items-center text-center gap-2 mb-2">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-green-500 to-blue-400 flex items-center justify-center shadow-lg mb-2">
+            <Users className="w-8 h-8 text-white animate-pulse" />
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-green-800 dark:text-green-100 tracking-tight drop-shadow-lg">Team Collaboration</h1>
+          <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-200 max-w-2xl mt-2">
+            Work together with your team in real-time collaborative workspaces. Share, invite, and manage QR codes seamlessly.
           </p>
         </div>
 
         {/* Navigation Tabs */}
         <div className="flex justify-center mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm">
+          <div className="bg-white/80 dark:bg-gray-800/80 rounded-xl p-2 shadow flex gap-2">
             <button
               onClick={() => setActiveTab('workspaces')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`px-6 py-2 rounded-lg text-base font-semibold transition-colors flex items-center gap-2 ${
                 activeTab === 'workspaces'
-                  ? 'bg-primary-500 text-white'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-green-600 text-white shadow-lg' : 'text-gray-600 dark:text-gray-300 hover:bg-green-100 dark:hover:bg-green-900'
               }`}
             >
-              <Users size={16} className="inline mr-2" />
-              Workspaces
+              <Users size={20} /> Workspaces
             </button>
             <button
               onClick={() => setActiveTab('shared')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`px-6 py-2 rounded-lg text-base font-semibold transition-colors flex items-center gap-2 ${
                 activeTab === 'shared'
-                  ? 'bg-primary-500 text-white'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-600 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900'
               }`}
             >
-              <Share2 size={16} className="inline mr-2" />
-              Shared with Me
+              <Share2 size={20} /> Shared with Me
             </button>
             <button
               onClick={() => setActiveTab('invites')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors relative ${
+              className={`px-6 py-2 rounded-lg text-base font-semibold transition-colors flex items-center gap-2 relative ${
                 activeTab === 'invites'
-                  ? 'bg-primary-500 text-white'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-yellow-500 text-white shadow-lg' : 'text-gray-600 dark:text-gray-300 hover:bg-yellow-100 dark:hover:bg-yellow-900'
               }`}
             >
-              <Mail size={16} className="inline mr-2" />
-              Invitations
+              <Mail size={20} /> Invitations
               {invites.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {invites.length}
                 </span>
               )}

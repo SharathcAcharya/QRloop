@@ -33,10 +33,10 @@ const Footer = () => {
     {
       title: 'Features',
       links: [
-        { label: '3D Visualization', href: '/features/3d' },
+        { label: '3D Visualization', href: '/visualization3d' },
         { label: 'AI Enhancement', href: '/features/ai' },
         { label: 'Batch Generation', href: '/features/batch' },
-        { label: 'Cloud Sync', href: '/features/sync' },
+        { label: 'Cloud Synk', href: '/features/cloudsynk' },
         { label: 'Team Management', href: '/features/team' },
       ],
     },

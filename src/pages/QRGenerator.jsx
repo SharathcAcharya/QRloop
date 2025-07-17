@@ -526,22 +526,23 @@ const QRGenerator = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen w-full bg-gradient-to-br from-indigo-100 via-white to-purple-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 py-0 flex items-center justify-center">
+      <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-12 flex flex-col gap-10">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            QR Code Generator
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300">
-            Create professional QR codes with advanced customization options
+        <div className="flex flex-col items-center text-center gap-2 mb-2">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-400 flex items-center justify-center shadow-lg mb-2">
+            <Zap className="w-8 h-8 text-white animate-pulse" />
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-indigo-800 dark:text-indigo-100 tracking-tight drop-shadow-lg">QR Code Generator</h1>
+          <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-200 max-w-2xl mt-2">
+            Create professional QR codes with advanced customization, AI enhancement, and 3D preview. Fast, beautiful, and reliable.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="relative grid grid-cols-1 xl:grid-cols-3 gap-10 items-start">
           {/* Connection Issue Banner */}
           {connectionStatus === 'blocked' && (
-            <div className="lg:col-span-3 mb-6">
+            <div className="xl:col-span-3 mb-6">
               <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
                 <div className="flex items-start space-x-3">
                   <WifiOff className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5" />
@@ -581,7 +582,7 @@ const QRGenerator = () => {
           )}
 
           {/* Left Column - Controls */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="xl:col-span-1 space-y-8 bg-white/80 dark:bg-gray-900/80 rounded-3xl shadow-xl p-6 border border-indigo-100 dark:border-indigo-800 relative z-10">
             {/* Data Type Selection */}
             <div className="card">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -1026,8 +1027,8 @@ const QRGenerator = () => {
           </div>
 
           {/* Right Column - Preview */}
-          <div className="lg:col-span-2">
-            <div className="card">
+          <div className="xl:col-span-2">
+            <div className="bg-white/90 dark:bg-gray-900/90 rounded-3xl shadow-2xl p-8 border border-indigo-100 dark:border-indigo-800 relative z-10 flex flex-col gap-8">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Preview
@@ -1059,10 +1060,10 @@ const QRGenerator = () => {
                 </div>
               </div>
 
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-8 flex items-center justify-center min-h-96">
+              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 flex items-center justify-center min-h-96 shadow-inner">
                 {qrData ? (
                   <div 
-                    className={`bg-white dark:bg-gray-700 p-6 rounded-lg shadow-lg transition-all duration-500 relative ${
+                    className={`bg-white dark:bg-gray-700 p-8 rounded-2xl shadow-2xl transition-all duration-500 relative ${
                       show3D ? 'cursor-grab active:cursor-grabbing' : ''
                     }`}
                     style={{

@@ -246,55 +246,53 @@ const QRScanner = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            QR Code Scanner
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300">
-            Scan QR codes from your camera or upload an image
+    <div className="min-h-screen w-full bg-gradient-to-br from-green-100 via-white to-blue-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 py-0 flex items-center justify-center">
+      <div className="w-full max-w-6xl mx-auto px-2 sm:px-6 lg:px-8 py-12 flex flex-col gap-10">
+        {/* Header */}
+        <div className="flex flex-col items-center text-center gap-2 mb-2">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-green-500 to-blue-400 flex items-center justify-center shadow-lg mb-2">
+            <Camera className="w-8 h-8 text-white animate-pulse" />
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-green-800 dark:text-green-100 tracking-tight drop-shadow-lg">QR Code Scanner</h1>
+          <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-200 max-w-2xl mt-2">
+            Scan QR codes instantly using your camera or by uploading an image. Fast, private, and secure.
           </p>
         </div>
 
         {/* Scan Mode Toggle */}
         <div className="flex justify-center mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm">
+          <div className="bg-white/80 dark:bg-gray-800/80 rounded-xl p-2 shadow flex gap-2">
             <button
               onClick={() => {
                 setScanMode('camera');
                 if (isScanning) stopCamera();
               }}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`px-6 py-2 rounded-lg text-base font-semibold transition-colors flex items-center gap-2 ${
                 scanMode === 'camera'
-                  ? 'bg-primary-500 text-white'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  ? 'bg-green-600 text-white shadow-lg' : 'text-gray-600 dark:text-gray-300 hover:bg-green-100 dark:hover:bg-green-900'
               }`}
             >
-              <Camera size={16} className="inline mr-2" />
-              Camera
+              <Camera size={20} /> Camera
             </button>
             <button
               onClick={() => {
                 setScanMode('upload');
                 if (isScanning) stopCamera();
               }}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`px-6 py-2 rounded-lg text-base font-semibold transition-colors flex items-center gap-2 ${
                 scanMode === 'upload'
-                  ? 'bg-primary-500 text-white'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-600 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900'
               }`}
             >
-              <Upload size={16} className="inline mr-2" />
-              Upload
+              <Upload size={20} /> Upload
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="relative grid grid-cols-1 xl:grid-cols-3 gap-10 items-start">
           {/* Scanner */}
-          <div className="lg:col-span-2">
-            <div className="card">
+          <div className="xl:col-span-2">
+            <div className="bg-white/90 dark:bg-gray-900/90 rounded-3xl shadow-2xl p-8 border border-green-100 dark:border-green-800 relative z-10 flex flex-col gap-8">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 {scanMode === 'camera' ? 'Camera Scanner' : 'Upload Image'}
               </h3>
@@ -427,7 +425,7 @@ const QRScanner = () => {
           </div>
 
           {/* Scan History */}
-          <div className="card">
+          <div className="bg-white/90 dark:bg-gray-900/90 rounded-3xl shadow-2xl p-8 border border-green-100 dark:border-green-800 relative z-10 flex flex-col gap-8">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Scan History
