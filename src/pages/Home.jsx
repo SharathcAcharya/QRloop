@@ -234,7 +234,6 @@ const Home = () => {
                   </div>
                 </div>
               </div>
-              
               {/* Floating Elements */}
               <div className="absolute -top-4 -right-4 bg-accent-500 text-white p-3 rounded-full shadow-lg animate-bounce">
                 <Sparkles size={20} />
@@ -246,7 +245,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
       {/* Features Section */}
       <section className="relative py-24 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
         <div className="absolute inset-0 pointer-events-none opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary-400 via-white to-secondary-400 dark:from-primary-900 dark:via-gray-900 dark:to-secondary-900" />
@@ -259,7 +257,6 @@ const Home = () => {
               Everything you need to create, customize, and manage professional QR codes
             </p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
             {features.map((feature) => {
               const Icon = feature.icon;
